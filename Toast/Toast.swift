@@ -247,16 +247,22 @@ public extension UIView {
      @warning `makeToastActivity(position:)` works independently of the `showToast` methods. Toast
      activity views can be presented and dismissed while toast views are being displayed.
      `makeToastActivity(position:)` has no effect on the queueing behavior of the `showToast` methods.
-    
+
+     @param customView The view is custom activity view
      @param position The toast's position
      */
-    func makeToastActivity(_ position: ToastPosition) {
+    func makeToastActivity(customView: UIView? = nil, _ position: ToastPosition) {
         // sanity
         guard objc_getAssociatedObject(self, &ToastKeys.activityView) as? UIView == nil else { return }
-        
-        let toast = createToastActivityView()
-        let point = position.centerPoint(forToast: toast, inSuperview: self)
-        makeToastActivity(toast, point: point)
+        if let customView {
+            let toast = createToastView(customView)
+            let point = position.centerPoint(forToast: toast, inSuperview: self)
+            makeToastActivity(toast, point: point)
+        } else {
+            let toast = createToastActivityView()
+            let point = position.centerPoint(forToast: toast, inSuperview: self)
+            makeToastActivity(toast, point: point)
+        }
     }
     
     /**
@@ -328,6 +334,27 @@ public extension UIView {
         activityView.addSubview(activityIndicatorView)
         activityIndicatorView.color = style.activityIndicatorColor
         activityIndicatorView.startAnimating()
+        
+        return activityView
+    }
+
+    private func createToastView(_ view: UIView) -> UIView {
+        let style = ToastManager.shared.style
+        
+        let activityView = UIView(frame: CGRect(x: 0.0, y: 0.0, width: style.activitySize.width, height: style.activitySize.height))
+        activityView.backgroundColor = style.activityBackgroundColor
+        activityView.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin, .flexibleTopMargin, .flexibleBottomMargin]
+        activityView.layer.cornerRadius = style.cornerRadius
+        
+        if style.displayShadow {
+            activityView.layer.shadowColor = style.shadowColor.cgColor
+            activityView.layer.shadowOpacity = style.shadowOpacity
+            activityView.layer.shadowRadius = style.shadowRadius
+            activityView.layer.shadowOffset = style.shadowOffset
+        }
+        
+        activityView.addSubview(view)
+        view.center = CGPoint(x: activityView.bounds.size.width / 2.0, y: activityView.bounds.size.height / 2.0)
         
         return activityView
     }
