@@ -248,21 +248,35 @@ public extension UIView {
      activity views can be presented and dismissed while toast views are being displayed.
      `makeToastActivity(position:)` has no effect on the queueing behavior of the `showToast` methods.
 
+     @param position The toast's position
+     */
+    func makeToastActivity(_ position: ToastPosition) {
+        // sanity
+        guard objc_getAssociatedObject(self, &ToastKeys.activityView) as? UIView == nil else { return }
+        let toast = createToastActivityView()
+        let point = position.centerPoint(forToast: toast, inSuperview: self)
+        makeToastActivity(toast, point: point)
+    }
+    
+    /**
+     Creates and displays a new toast custom activity indicator view at a specified position.
+    
+     @warning Only one toast activity indicator view can be presented per superview. Subsequent
+     calls to `makeToastActivity(position:)` will be ignored until `hideToastActivity()` is called.
+    
+     @warning `makeToastActivity(position:)` works independently of the `showToast` methods. Toast
+     activity views can be presented and dismissed while toast views are being displayed.
+     `makeToastActivity(position:)` has no effect on the queueing behavior of the `showToast` methods.
+
      @param customView The view is custom activity view
      @param position The toast's position
      */
-    func makeToastActivity(customView: UIView? = nil, _ position: ToastPosition) {
+    func makeToastCustomActivityView(_ customView: UIView, position: ToastPosition) {
         // sanity
         guard objc_getAssociatedObject(self, &ToastKeys.activityView) as? UIView == nil else { return }
-        if let customView {
-            let toast = createToastView(customView)
-            let point = position.centerPoint(forToast: toast, inSuperview: self)
-            makeToastActivity(toast, point: point)
-        } else {
-            let toast = createToastActivityView()
-            let point = position.centerPoint(forToast: toast, inSuperview: self)
-            makeToastActivity(toast, point: point)
-        }
+        let toast = createToastView(customView)
+        let point = position.centerPoint(forToast: toast, inSuperview: self)
+        makeToastActivity(toast, point: point)
     }
     
     /**
