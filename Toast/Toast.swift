@@ -127,7 +127,7 @@ public extension UIView {
      @param completion The completion closure, executed after the toast view disappears.
             didTap will be `true` if the toast view was dismissed from a tap.
      */
-    func makeToast(_ message: String?, duration: TimeInterval = ToastManager.shared.duration, point: CGPoint, title: String?, image: UIImage?, style: ToastStyle = ToastManager.shared.style, completion: ((_ didTap: Bool) -> Void)?) {
+    func makeToast(_ message: String?, duration: TimeInterval = ToastManager.shared.duration, point: CGPoint, title: String?, image: UIImage?, style:  = ToastManager.shared.style, completion: ((_ didTap: Bool) -> Void)?) {
         do {
             let toast = try toastViewForMessage(message, title: title, image: image, style: style)
             showToast(toast, duration: duration, point: point, completion: completion)
@@ -354,8 +354,12 @@ public extension UIView {
 
     private func createToastView(_ view: UIView) -> UIView {
         let style = ToastManager.shared.style
-        
-        let activityView = UIView(frame: CGRect(x: 0.0, y: 0.0, width: style.activitySize.width, height: style.activitySize.height))
+        let activityView: UIView
+        if style.isFullViewOfActivityIndicator {
+            activityView = UIView(frame: CGRect(x: 0.0, y: 0.0, width: frame.width, height: frame.height))
+        } else {
+            activityView = UIView(frame: CGRect(x: 0.0, y: 0.0, width: style.activitySize.width, height: style.activitySize.height))
+        }
         activityView.backgroundColor = style.activityBackgroundColor
         activityView.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin, .flexibleTopMargin, .flexibleBottomMargin]
         activityView.layer.cornerRadius = style.cornerRadius
@@ -728,6 +732,10 @@ public struct ToastStyle {
      Activity background color. Default is `.black` at 80% opacity.
      */
     public var activityBackgroundColor: UIColor = UIColor.black.withAlphaComponent(0.8)
+    /**
+     Activity indicator view is fill supper view
+     */
+    public var isFullViewOfActivityIndicator: Bool = false
     
 }
 
